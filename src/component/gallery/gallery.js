@@ -2,15 +2,15 @@ import React from "react";
 import { HeaderNavbar } from "../navbar/navbar";
 import './gallery.css';
 import { Swiper, SwiperSlide } from "swiper/react";
-
+import "swiper/css/pagination";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
-
+import { service } from "../../service/ServiceContext";
 
 // import required modules
-import { EffectCoverflow, Keyboard, Pagination } from "swiper";
+import { EffectCoverflow, Grid, Keyboard, Pagination } from "swiper";
 import { PicModal } from "./picModal/picModal.js";
 
 class Gallery extends React.Component {
@@ -20,6 +20,7 @@ class Gallery extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            isGridView: true,
             showModal: false,
             src: '',
             activeIndex: 0,
@@ -50,23 +51,10 @@ class Gallery extends React.Component {
         }
     }
 
-    image = [];
-    lazyLoad() {
-        let scrollTop = window.pageYOffset;
-        this.image.forEach(img => {
-            if (img.offsetTop < (window.innerHeight + scrollTop)) {
-                img.src = img.dataset.src;
-                img.classList.remove('lazy');
-            }
-        })
-
-    }
     componentDidMount() {
-        this.lazyLoad();
-        this.image = document.querySelectorAll('img.lazy');
-        document.addEventListener("scroll", () => this.lazyLoad());
-        window.addEventListener("resize", () => this.lazyLoad());
-        window.addEventListener("orientationChange", () => this.lazyLoad());
+        this.context.galleryService.getGallery().then(gallery => {
+            this.setState({ albums: gallery });
+        });
     }
 
     closeModal() {
@@ -74,7 +62,7 @@ class Gallery extends React.Component {
     }
 
     openModal(index, albumIndex) {
-        this.setState({images: this.state.albums[albumIndex].images});
+        this.setState({ images: this.state.albums[albumIndex].image });
         this.setState({ showModal: true })
         this.setState({ activeIndex: index });
     }
@@ -85,15 +73,71 @@ class Gallery extends React.Component {
         this.setState({ src: activeScr });
     }
 
+    renderAlbumInGrid(album, albumIndex) {
+        return (
+            <>
+                <div class="container">
+                    <div class = "row">
+                    {album.image && album.image.map((image, index) => {
+                        return (<>
+                                {image.isImage && <div class="col-4 col-lg-3">
+                                    <img class="m-2" onClick={() => this.openModal(index, albumIndex)} src={image.src} alt={image.alt} role={image.role} /></div>
+                                }
+                        </>
+                        );
+                    })}
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    renderAlbumInCoverflow(album, albumIndex) {
+        return (
+            <>
+                <Swiper
+                    onSlideChange={swiper => this.slideChange(swiper)}
+                    effect={"coverflow"}
+                    grabCursor={true}
+                    centeredSlides={true}
+                    slidesPerView={"auto"}
+                    keyboard={{
+                        enabled: true,
+                    }}
+                    coverflowEffect={{
+                        rotate: 50,
+                        stretch: 0,
+                        depth: 100,
+                        modifier: 1,
+                        slideShadows: true,
+                    }}
+                    pagination={true}
+                    modules={[EffectCoverflow, Pagination, Keyboard]}
+                    className="slideSwiper"
+                >
+                    {album.image && album.image.map((image, index) => {
+                        return (
+                            <SwiperSlide key={index}>
+                                {image.isImage &&
+                                    <img onClick={() => this.openModal(index, albumIndex)} src={image.src} alt={image.alt} role={image.role} />
+                                }
+                            </SwiperSlide>
+                        );
+                    })}
+                </Swiper>
+            </>
+        );
+    }
+
     renderAlbum() {
         return (
             <>
                 {
                     this.state.albums &&
-                    this.state.albums.map((album,albumIndex) => {
+                    this.state.albums.map((album, albumIndex) => {
                         return (
                             <>
-                                <li class="timeline-item mb-5">
+                                <li key={albumIndex} class="timeline-item mb-5">
                                     <span class="timeline-icon">
                                         <i class="fas fa-rocket text-primary fa-sm fa-fw"></i>
                                     </span>
@@ -101,35 +145,7 @@ class Gallery extends React.Component {
                                     <h5 class="fw-bold">{album.name}</h5>
                                     <p class="text-muted mb-2 fw-bold">{album.date}</p>
                                     <p class="text-muted">
-                                        <Swiper
-                                            onSlideChange={swiper => this.slideChange(swiper)}
-                                            effect={"coverflow"}
-                                            grabCursor={true}
-                                            centeredSlides={true}
-                                            slidesPerView={"auto"}
-                                            keyboard={{
-                                                enabled: true,
-                                            }}
-                                            coverflowEffect={{
-                                                rotate: 50,
-                                                stretch: 0,
-                                                depth: 100,
-                                                modifier: 1,
-                                                slideShadows: true,
-                                            }}
-                                            pagination={true}
-                                            modules={[EffectCoverflow, Pagination, Keyboard]}
-                                            className="slideSwiper"
-                                        >
-                                            {album.images.map((image, index) => {
-                                                return (
-                                                    <SwiperSlide>
-                                                        <img onClick={() => this.openModal(index, albumIndex)} src={image} />
-                                                    </SwiperSlide>
-                                                );
-                                            })}
-                                        </Swiper>
-
+                                        {this.state.isGridView ? this.renderAlbumInGrid(album, albumIndex) : this.renderAlbumInCoverflow(album, albumIndex)}
                                     </p>
                                 </li>
                             </>
@@ -143,7 +159,8 @@ class Gallery extends React.Component {
     render() {
         return (
             <>
-                {this.state.showModal ? <PicModal images={this.state.images} activeIndex={this.state.activeIndex} closeEvent={() => this.closeModal()} /> :
+                {this.state.showModal ?
+                    <PicModal images={this.state.images} activeIndex={this.state.activeIndex} closeEvent={() => this.closeModal()} /> :
                     <>
                         <HeaderNavbar />
                         <section className="gallery">
@@ -157,5 +174,6 @@ class Gallery extends React.Component {
         );
     }
 }
-
+Gallery.contextType = service;
 export default Gallery;
+

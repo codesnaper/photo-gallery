@@ -2,15 +2,8 @@ import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Import Swiper styles
-import "swiper/css";
-import "swiper/css/pagination";
 import "./picModal.css"
 import { EffectCoverflow, FreeMode, Keyboard, Navigation, Thumbs } from "swiper";
-import "swiper/css";
-import "swiper/css/effect-coverflow";
-import "swiper/css/pagination";
-import { MDBBtn } from "mdb-react-ui-kit";
-
 
 export class PicModal extends React.Component {
 
@@ -18,14 +11,18 @@ export class PicModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentScr: ''
+      currentScr: '',
+      alt: '',
+      role: ''
     }
   }
 
   slideChange(swiper) {
     let image = swiper.el.querySelectorAll('img');
-    let activeScr = image[swiper.activeIndex].src;
-    this.setState({ currentScr: activeScr });
+    let img = image[swiper.activeIndex];
+    this.setState({ currentScr: img.src });
+    this.setState({ alt: img.alt });
+    this.setState({ alt: img.role });
   }
 
   initDownSlider(swiper){
@@ -42,7 +39,7 @@ export class PicModal extends React.Component {
                 <div className="container">
                   <div className="row">
                     <div className="col-9">
-                      <span className="text-white">Image Namw</span>
+                      <span className="text-white">{this.props.images[this.props.activeIndex].name}</span>
                     </div>
                     <div className="col-3">
                       <ul class="list-inline d-flex justify-content-end">
@@ -55,7 +52,12 @@ export class PicModal extends React.Component {
                   </div>
                 </div>
                 <div className="text-center">
-                  <img src={this.state.currentScr !== '' ? this.state.currentScr : this.props.images[this.props.activeIndex]} />
+                  <img 
+                  src={this.state.currentScr !== '' ? this.state.currentScr : this.props.images[this.props.activeIndex].src} 
+                  alt={this.state.currentScr !== '' ? this.state.alt : this.props.images[this.props.activeIndex].alt} 
+                  role={this.state.currentScr !== '' ? this.state.role : this.props.images[this.props.activeIndex].role} 
+                  
+                  />
                 </div>
               </SwiperSlide>
             </Swiper>
@@ -82,10 +84,10 @@ export class PicModal extends React.Component {
               className="downSwipe"
             >
               {
-                this.props.images.map(image => {
+                this.props.images.map((image,index) => {
                   return (
-                    <SwiperSlide>
-                      <img src={image} />
+                    <SwiperSlide key={index}>
+                      <img src={image.src} alt={image.alt} role={image.role} />
                     </SwiperSlide>
                   );
                 })
