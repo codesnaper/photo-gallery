@@ -1,4 +1,4 @@
-org: codesnaper
+#org: codesnaper
 app: gallery-api
 service: gallery-api
 frameworkVersion: '3'
@@ -6,12 +6,13 @@ frameworkVersion: '3'
 custom:
   galleryTable: 'gallery-table-${sls:stage}'
   dynamodb:
-    stage:
+    stages:
       - dev
     start:
       port: 8000
       inMemory: true
       migrate: true
+      convertEmptyValues: true
     migration:
       dir: dest/migrations
 

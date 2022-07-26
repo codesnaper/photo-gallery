@@ -12,5 +12,9 @@
     "serverless-dynamodb-local": "^0.2.40",
     "serverless-offline": "^9.0.0",
     "serverless-webpack": "^5.7.1"
+  },
+  "scripts": {
+    "dynamodb-install-local": "serverless dynamodb install",
+    "start": "npm run dynamodb-install-local && serverless offline start"
   }
 }
