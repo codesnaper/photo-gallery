@@ -50,10 +50,10 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: ID
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: ID
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:custom.galleryTable}

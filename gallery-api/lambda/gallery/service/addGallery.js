@@ -1,11 +1,11 @@
 const Dynamo = require("../../util/dynamoDB");
 const { Gallery } = require("../modal/Gallery");
-
+const uuid = require('uuid');
 const galleryTable = process.env.GALLERY_TABLE;
 exports.addGallery =  (data)=> {
     return new Promise((resolve, reject) => {
         let gallery = new Gallery();
-        gallery.ID = 1;
+        gallery.ID = uuid.v4();
         gallery.name = data.name ? data.name: '';
         gallery.date = data.date ? data.date: new Date().getDate();
         gallery.images = data.images ? data.images: [];
