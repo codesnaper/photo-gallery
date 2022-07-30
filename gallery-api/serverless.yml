@@ -5,6 +5,9 @@ frameworkVersion: '3'
 
 custom:
   galleryTable: 'gallery-table-${sls:stage}'
+  s3:
+    host: localhost
+    directory: /tmp
   dynamodb:
     stages:
       - dev
@@ -40,9 +43,11 @@ provider:
 
 functions:
   gallery:
-    handler: lambda/gallery/controller.handler
+    handler: src/gallery/controller.handler
     events:
-      - httpApi: '*'
+      - httpApi:
+          method: '*'
+          path: /gallery/{param*}
 
 resources:
   Resources:
@@ -57,8 +62,13 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:custom.galleryTable}
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: local-bucket
 
 plugins:
   - serverless-offline
   - serverless-webpack
   - serverless-dynamodb-local
+  - serverless-s3-local

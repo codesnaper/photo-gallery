@@ -1,5 +1,5 @@
 export class Gallery {
-    id= '';
+    ID= '';
     name = '' ;
     date = '';
     images = '';
