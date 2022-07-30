@@ -16,6 +16,9 @@
   },
   "scripts": {
     "dynamodb-install-local": "serverless dynamodb install",
-    "start": "npm run dynamodb-install-local && serverless offline start"
+    "start": "npm run dynamodb-install-local && serverless offline start",
+    "deploy-gallery-dev": "serverless deploy function --function gallery --stage dev --region us-east-1",
+    "deploy-gallery-config": "serverless deploy function --function gallery --stage dev --update-config",
+    "deploy-gallery-prod": "serverless deploy function --function gallery --stage prod --region us-east-1"
   }
 }

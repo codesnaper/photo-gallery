@@ -5,6 +5,8 @@ frameworkVersion: '3'
 
 custom:
   galleryTable: 'gallery-table-${sls:stage}'
+  shareTable: 'share-table-${sls:stage}'
+  groupTable: 'group-table-${sls:stage}'
   s3:
     host: localhost
     directory: /tmp
@@ -40,6 +42,8 @@ provider:
             - Fn::GetAtt: [ UsersTable, Arn ]
   environment:
     GALLERY_TABLE: ${self:custom.galleryTable}
+    SHARE_TABLE: ${self:custom.shareTable}
+    GROUP_TABLE: ${self:custom.groupTable}
 
 functions:
   gallery:
@@ -48,6 +52,30 @@ functions:
       - httpApi:
           method: '*'
           path: /gallery/{param*}
+  share:
+    handler: src/share/controller.handler
+    events:
+      - httpApi:
+          method: '*'
+          path: /share/{param*}
+  group:
+    handler: src/group/controller.handler
+    events:
+      - httpApi:
+          method: '*'
+          path: /group/{param*}
+  media:
+    handler: src/media/controller.handler
+    events:
+      - httpApi:
+          method: '*'
+          path: /media/{param*}
+  user:
+    handler: src/user/controller.handler
+    events:
+      - httpApi:
+          method: '*'
+          path: /user/{param*}
 
 resources:
   Resources:
@@ -62,6 +90,28 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:custom.galleryTable}
+    ShareTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.shareTable}
+    GroupTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.groupTable}
     S3Bucket:
       Type: AWS::S3::Bucket
       Properties:

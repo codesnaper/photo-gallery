@@ -21,10 +21,22 @@ const Dynamo = {
             },
         };
         const data = await documentClient.get(params).promise();
-        if (!data || !data.Item) {
-            throw Error(`There was an error fetching the data for ID of ${ID} from ${TableName}`);
-        }
-        return data.Item;
+        return data;
+    },
+
+    async query(param){
+        return await documentClient.query(param).promise();
+    },
+
+    async delete(ID, TableName) {
+        const params = {
+            TableName,
+            Key: {
+                ID,
+            },
+        };
+        const data = await documentClient.delete(params).promise();
+        return data;
     },
 
     async write(data, TableName) {
